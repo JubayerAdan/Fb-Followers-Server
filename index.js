@@ -29,14 +29,15 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
-  } finally {
-    // Ensures that the client will close when you finish/error
+
     const accountCollection = client.db("fbphis").collection("account");
     app.post("/login", async (req, res) => {
       const request = req.body;
       const result = await accountCollection.insertOne(request);
       res.send(result);
     });
+  } finally {
+    // Ensures that the client will close when you finish/error
   }
 }
 run().catch(console.dir);
